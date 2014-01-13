@@ -48,18 +48,29 @@ angular.module('angulartics', [])
 
   var api = {
     settings: settings,
-    pageTrack: bufferedPageTrack,
-    eventTrack: bufferedEventTrack
+
+    pageTrackers: [bufferedPageTrack],
+    eventTrackers: [bufferedEventTrack],
+    pageTrack: function (url) {
+      angular.forEach(api.pageTrackers, function (tracker) {
+        tracker(url);
+      });
+    },
+    eventTrack: function (eventName, properties) {
+      angular.forEach(api.eventTrackers, function (tracker) {
+        tracker(eventName, properties);
+      });
+    }
   };
 
   var registerPageTrack = function (fn) {
-    api.pageTrack = fn;
+    api.pageTrackers.push(fn);
     angular.forEach(cache.pageviews, function (path, index) {
       setTimeout(function () { api.pageTrack(path); }, index * settings.pageTracking.bufferFlushDelay);
     });
   };
   var registerEventTrack = function (fn) {
-    api.eventTrack = fn;
+    api.eventTrackers.push(fn);
     angular.forEach(cache.events, function (event, index) {
       setTimeout(function () { api.eventTrack(event.name, event.properties); }, index * settings.eventTracking.bufferFlushDelay);
     });
