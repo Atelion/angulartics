@@ -22,16 +22,16 @@ angulartics.waitForVendorApi = function (objectName, delay, registerFn) {
  */
 angular.module('angulartics', [])
 .provider('$analytics', function () {
-  var settings = { 
-    pageTracking: { 
+  var settings = {
+    pageTracking: {
       autoTrackFirstPage: true,
       autoTrackVirtualPages: true,
       basePath: '',
-      bufferFlushDelay: 1000 
+      bufferFlushDelay: 1000
     },
     eventTracking: {
       bufferFlushDelay: 1000
-    } 
+    }
   };
 
   var cache = {
@@ -49,17 +49,25 @@ angular.module('angulartics', [])
   var api = {
     settings: settings,
 
-    pageTrackers: [bufferedPageTrack],
-    eventTrackers: [bufferedEventTrack],
+    pageTrackers: [],
+    eventTrackers: [],
     pageTrack: function (url) {
-      angular.forEach(api.pageTrackers, function (tracker) {
-        tracker(url);
-      });
+      if (this.pageTrackers.length) {
+        angular.forEach(api.pageTrackers, function (tracker) {
+          tracker(url);
+        });
+      } else {
+        bufferedPageTrack(url);
+      }
     },
     eventTrack: function (eventName, properties) {
-      angular.forEach(api.eventTrackers, function (tracker) {
-        tracker(eventName, properties);
-      });
+      if (this.eventTrackers.length) {
+        angular.forEach(api.eventTrackers, function (tracker) {
+          tracker(eventName, properties);
+        });
+      } else {
+        bufferedEventTrack(eventName, properties);
+      }
     }
   };
 
